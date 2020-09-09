@@ -16,16 +16,20 @@ URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 
 
 def parse_homework_status(homework):
-    if homework.get('homework_name'):
-        homework_name = homework.get('homework_name')
-        if homework['status'] == 'rejected':
-            verdict = 'К сожалению в работе нашлись ошибки.'
-        else:
-            verdict = ('Ревьюеру всё понравилось, '
-                       'можно приступать к следующему уроку.')
-        return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
-    else:
+    homework_name = homework.get('homework_name')
+    if homework_name is None:
         return 'Не удалось найти имя домашней работы'
+
+    homework_status = homework.get('status')
+    if homework_status is None:
+        return 'Не удалось получить состояние домашней работы'
+
+    if homework_status == 'rejected':
+        verdict = 'К сожалению в работе нашлись ошибки.'
+    else:
+        verdict = ('Ревьюеру всё понравилось, '
+                   'можно приступать к следующему уроку.')
+    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
 def get_homework_statuses(current_timestamp):
