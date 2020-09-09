@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -15,20 +16,30 @@ URL = 'https://praktikum.yandex.ru/api/user_api/homework_statuses/'
 
 
 def parse_homework_status(homework):
-    homework_name = homework['homework_name']
-    if homework['status'] == 'rejected':
-        verdict = 'К сожалению в работе нашлись ошибки.'
+    if homework.get('homework_name'):
+        homework_name = homework.get('homework_name')
+        if homework['status'] == 'rejected':
+            verdict = 'К сожалению в работе нашлись ошибки.'
+        else:
+            verdict = ('Ревьюеру всё понравилось, '
+                       'можно приступать к следующему уроку.')
+        return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
     else:
-        verdict = ('Ревьюеру всё понравилось, '
-                   'можно приступать к следующему уроку.')
-    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
+        return 'Не удалось найти имя домашней работы'
 
 
 def get_homework_statuses(current_timestamp):
+    if current_timestamp is None:
+        current_timestamp = int(time.time())
     headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     payload = {'from_date': current_timestamp}
-    homework_statuses = requests.get(URL, headers=headers, params=payload)
-    return homework_statuses.json()
+    try:
+        homework_statuses = requests.get(URL, headers=headers, params=payload)
+    except requests.exceptions.RequestException as e:
+        logging.basicConfig(filename='logger.log', level=logging.DEBUG)
+        logging.debug(f'{e} во время запроса к API')
+    else:
+        return homework_statuses.json()
 
 
 def send_message(message):
