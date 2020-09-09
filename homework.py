@@ -30,7 +30,7 @@ def parse_homework_status(homework):
 
 def get_homework_statuses(current_timestamp):
     if current_timestamp is None:
-        current_timestamp = int(time.time())
+        current_timestamp = int(time.time() - 300)
     headers = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
     payload = {'from_date': current_timestamp}
     try:
